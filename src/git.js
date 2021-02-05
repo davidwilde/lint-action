@@ -64,6 +64,17 @@ function hasChanges() {
 }
 
 /**
+ * Returns the changed files
+ * @returns {string} - String list of the changed files
+ */
+function changedFiles() {
+	const files = run("git diff --name-only --diff-filter=d $(git merge-base HEAD ${GITHUB_BASE_REF})");
+	core.info(`changed files:
+	${files}`);
+	return files;
+}
+
+/**
  * Pushes all changes to the remote repository
  */
 function pushChanges() {
@@ -89,4 +100,5 @@ module.exports = {
 	hasChanges,
 	pushChanges,
 	setUserInfo,
+	changedFiles,
 };

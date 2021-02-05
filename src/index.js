@@ -25,6 +25,7 @@ async function runAction() {
 	const gitEmail = core.getInput("git_email", { required: true });
 	const commitMessage = core.getInput("commit_message", { required: true });
 	const checkName = core.getInput("check_name", { required: true });
+	const onlyChanges = core.getInput("only_changes", { required: true });
 	const isPullRequest = context.eventName === "pull_request";
 
 	// If on a PR from fork: Display messages regarding action limitations
@@ -55,6 +56,11 @@ async function runAction() {
 		//   first
 		git.checkOutRemoteBranch(context);
 	}
+	if (onlyChanges) {
+		process.env["DIFF"] = git.changedFiles();
+	} else {
+		process.env["DIFF"] = ".";
+	}
 
 	let headSha = git.getHeadSha();
 
@@ -84,7 +90,7 @@ async function runAction() {
 
 			// Lint and optionally auto-fix the matching files, parse code style violations
 			core.info(
-				`Linting ${autoFix ? "and auto-fixing " : ""}files in ${lintDirAbs} with ${linter.name}…`,
+				`Linting ${autoFix ? "and auto-fixing " : ""}${onlyChanges ? "changed " : ""}files in ${lintDirAbs} with ${linter.name}…`,
 			);
 			const lintOutput = linter.lint(lintDirAbs, fileExtList, args, autoFix, prefix);
 
