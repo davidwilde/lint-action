@@ -68,10 +68,12 @@ function hasChanges() {
  * @returns {string} - String list of the changed files
  */
 function changedFiles() {
-	const files = run(
-		"git diff --name-only --diff-filter=d $(git merge-base HEAD ${GITHUB_BASE_REF})",
-	).stdout;
-	core.info(`changed files:
+	const githubRef = process.env["GITHUB_REF"];
+	const githubBaseRef = process.env["GITHUB_BASE_REF"];
+	const cmd = `git diff --name-only --diff-filter=d $(git merge-base ${githubRef} ${githubBaseRef});`;
+	core.info(cmd);
+	const files = run(cmd).stdout;
+	core.info(`changed filesnames:
 	${files}`);
 	return files;
 }

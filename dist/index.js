@@ -862,8 +862,12 @@ function hasChanges() {
  * @returns {string} - String list of the changed files
  */
 function changedFiles() {
-	const files = run("git diff --name-only --diff-filter=d $(git merge-base HEAD ${GITHUB_BASE_REF})");
-	core.info(`changed files:
+	const githubRef = process.env["GITHUB_REF"];
+	const githubBaseRef = process.env["GITHUB_BASE_REF"];
+	const cmd = `git diff --name-only --diff-filter=d $(git merge-base ${githubRef} ${githubBaseRef});`;
+	core.info(cmd);
+	const files = run(cmd).stdout;
+	core.info(`changed filesnames:
 	${files}`);
 	return files;
 }
@@ -1162,13 +1166,13 @@ async function runAction() {
 		//   first
 		git.checkOutRemoteBranch(context);
 	}
-	// if (onlyChanges) {
-	const changedFiles = git.changedFiles();
-	core.info(`changed files: ${changedFiles}`);
-	process.env["DIFF"] = changedFiles;
-	// } else {
-	// process.env["DIFF"] = ".";
-	// }
+	if (onlyChanges) {
+		const changedFiles = git.changedFiles();
+		core.info(`changed files: ${changedFiles}`);
+		process.env["DIFF"] = changedFiles;
+	} else {
+		process.env["DIFF"] = ".";
+	}
 
 	let headSha = git.getHeadSha();
 
@@ -2932,7 +2936,7 @@ module.exports = {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"lint-action\",\"version\":\"1.8.0\",\"description\":\"GitHub Action for detecting and fixing linting errors\",\"author\":{\"name\":\"Samuel Meuli\",\"email\":\"me@samuelmeuli.com\",\"url\":\"https://samuelmeuli.com\"},\"repository\":\"github:davidwilde/lint-action\",\"license\":\"MIT\",\"private\":true,\"main\":\"./dist/index.js\",\"scripts\":{\"test\":\"jest\",\"lint\":\"eslint --max-warnings 0 \\\"**/*.js\\\"\",\"lint:fix\":\"yarn lint --fix\",\"format\":\"prettier --list-different \\\"**/*.{css,html,js,json,jsx,less,md,scss,ts,tsx,vue,yaml,yml}\\\"\",\"format:fix\":\"yarn format --write\",\"build\":\"ncc build ./src/index.js\"},\"dependencies\":{\"@actions/core\":\"^1.2.6\",\"command-exists\":\"^1.2.9\",\"parse-diff\":\"^0.7.1\"},\"peerDependencies\":{},\"devDependencies\":{\"@samuelmeuli/eslint-config\":\"^6.0.0\",\"@samuelmeuli/prettier-config\":\"^2.0.1\",\"@vercel/ncc\":\"^0.27.0\",\"eslint\":\"7.18.0\",\"eslint-config-airbnb-base\":\"14.2.1\",\"eslint-config-prettier\":\"^7.1.0\",\"eslint-plugin-import\":\"^2.22.1\",\"eslint-plugin-jsdoc\":\"^31.0.7\",\"fs-extra\":\"^9.0.1\",\"jest\":\"^26.6.3\",\"prettier\":\"^2.2.1\"},\"eslintConfig\":{\"root\":true,\"extends\":[\"@samuelmeuli/eslint-config\",\"plugin:jsdoc/recommended\"],\"env\":{\"node\":true,\"jest\":true},\"settings\":{\"jsdoc\":{\"mode\":\"typescript\"}},\"rules\":{\"no-await-in-loop\":\"off\",\"no-unused-vars\":[\"error\",{\"args\":\"none\",\"varsIgnorePattern\":\"^_\"}],\"jsdoc/check-indentation\":\"error\",\"jsdoc/check-syntax\":\"error\",\"jsdoc/newline-after-description\":[\"error\",\"never\"],\"jsdoc/require-description\":\"error\",\"jsdoc/require-hyphen-before-param-description\":\"error\",\"jsdoc/require-jsdoc\":\"off\"}},\"eslintIgnore\":[\"node_modules/\",\"test/linters/projects/\",\"test/tmp/\",\"dist/\"],\"jest\":{\"globalSetup\":\"./test/setup.js\",\"globalTeardown\":\"./test/teardown.js\"},\"prettier\":\"@samuelmeuli/prettier-config\"}");
+module.exports = JSON.parse("{\"name\":\"lint-action\",\"version\":\"1.10.0\",\"description\":\"GitHub Action for detecting and fixing linting errors\",\"author\":{\"name\":\"Samuel Meuli\",\"email\":\"me@samuelmeuli.com\",\"url\":\"https://samuelmeuli.com\"},\"repository\":\"github:davidwilde/lint-action\",\"license\":\"MIT\",\"private\":true,\"main\":\"./dist/index.js\",\"scripts\":{\"test\":\"jest\",\"lint\":\"eslint --max-warnings 0 \\\"**/*.js\\\"\",\"lint:fix\":\"yarn lint --fix\",\"format\":\"prettier --list-different \\\"**/*.{css,html,js,json,jsx,less,md,scss,ts,tsx,vue,yaml,yml}\\\"\",\"format:fix\":\"yarn format --write\",\"build\":\"ncc build ./src/index.js\"},\"dependencies\":{\"@actions/core\":\"^1.2.6\",\"command-exists\":\"^1.2.9\",\"parse-diff\":\"^0.7.1\"},\"peerDependencies\":{},\"devDependencies\":{\"@samuelmeuli/eslint-config\":\"^6.0.0\",\"@samuelmeuli/prettier-config\":\"^2.0.1\",\"@vercel/ncc\":\"^0.27.0\",\"eslint\":\"7.18.0\",\"eslint-config-airbnb-base\":\"14.2.1\",\"eslint-config-prettier\":\"^7.1.0\",\"eslint-plugin-import\":\"^2.22.1\",\"eslint-plugin-jsdoc\":\"^31.0.7\",\"fs-extra\":\"^9.0.1\",\"jest\":\"^26.6.3\",\"prettier\":\"^2.2.1\"},\"eslintConfig\":{\"root\":true,\"extends\":[\"@samuelmeuli/eslint-config\",\"plugin:jsdoc/recommended\"],\"env\":{\"node\":true,\"jest\":true},\"settings\":{\"jsdoc\":{\"mode\":\"typescript\"}},\"rules\":{\"no-await-in-loop\":\"off\",\"no-unused-vars\":[\"error\",{\"args\":\"none\",\"varsIgnorePattern\":\"^_\"}],\"jsdoc/check-indentation\":\"error\",\"jsdoc/check-syntax\":\"error\",\"jsdoc/newline-after-description\":[\"error\",\"never\"],\"jsdoc/require-description\":\"error\",\"jsdoc/require-hyphen-before-param-description\":\"error\",\"jsdoc/require-jsdoc\":\"off\"}},\"eslintIgnore\":[\"node_modules/\",\"test/linters/projects/\",\"test/tmp/\",\"dist/\"],\"jest\":{\"globalSetup\":\"./test/setup.js\",\"globalTeardown\":\"./test/teardown.js\"},\"prettier\":\"@samuelmeuli/prettier-config\"}");
 
 /***/ }),
 
