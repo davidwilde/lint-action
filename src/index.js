@@ -56,13 +56,13 @@ async function runAction() {
 		//   first
 		git.checkOutRemoteBranch(context);
 	}
-	// if (onlyChanges) {
-	const changedFiles = git.changedFiles();
-	core.info(`changed files: ${changedFiles}`);
-	process.env["DIFF"] = changedFiles;
-	// } else {
-	// process.env["DIFF"] = ".";
-	// }
+	if (onlyChanges) {
+		const changedFiles = git.changedFiles();
+		core.info(`changed files: ${changedFiles}`);
+		process.env["DIFF"] = changedFiles;
+	} else {
+		process.env["DIFF"] = ".";
+	}
 
 	let headSha = git.getHeadSha();
 
