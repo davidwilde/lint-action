@@ -57,7 +57,9 @@ async function runAction() {
 		git.checkOutRemoteBranch(context);
 	}
 	if (onlyChanges) {
-		process.env["DIFF"] = git.changedFiles();
+		const changedFiles = git.changedFiles();
+		core.info(`changed files: ${changedFiles}`);
+		process.env["DIFF"] = changedFiles;
 	} else {
 		process.env["DIFF"] = ".";
 	}

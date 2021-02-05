@@ -858,6 +858,17 @@ function hasChanges() {
 }
 
 /**
+ * Returns the changed files
+ * @returns {string} - String list of the changed files
+ */
+function changedFiles() {
+	const files = run("git diff --name-only --diff-filter=d $(git merge-base HEAD ${GITHUB_BASE_REF})");
+	core.info(`changed files:
+	${files}`);
+	return files;
+}
+
+/**
  * Pushes all changes to the remote repository
  */
 function pushChanges() {
@@ -883,6 +894,7 @@ module.exports = {
 	hasChanges,
 	pushChanges,
 	setUserInfo,
+	changedFiles,
 };
 
 
@@ -1119,6 +1131,7 @@ async function runAction() {
 	const gitEmail = core.getInput("git_email", { required: true });
 	const commitMessage = core.getInput("commit_message", { required: true });
 	const checkName = core.getInput("check_name", { required: true });
+	const onlyChanges = core.getInput("only_changes", { required: true });
 	const isPullRequest = context.eventName === "pull_request";
 
 	// If on a PR from fork: Display messages regarding action limitations
@@ -1149,6 +1162,13 @@ async function runAction() {
 		//   first
 		git.checkOutRemoteBranch(context);
 	}
+	if (onlyChanges) {
+		const changedFiles = git.changedFiles();
+		core.info(`changed files: ${changedFiles}`);
+		process.env["DIFF"] = changedFiles;
+	} else {
+		process.env["DIFF"] = ".";
+	}
 
 	let headSha = git.getHeadSha();
 
@@ -1178,7 +1198,7 @@ async function runAction() {
 
 			// Lint and optionally auto-fix the matching files, parse code style violations
 			core.info(
-				`Linting ${autoFix ? "and auto-fixing " : ""}files in ${lintDirAbs} with ${linter.name}…`,
+				`Linting ${autoFix ? "and auto-fixing " : ""}${onlyChanges ? "changed " : ""}files in ${lintDirAbs} with ${linter.name}…`,
 			);
 			const lintOutput = linter.lint(lintDirAbs, fileExtList, args, autoFix, prefix);
 
@@ -1361,7 +1381,7 @@ class ESLint {
 		const fixArg = fix ? "--fix" : "";
 		const commandPrefix = prefix || getNpmBinCommand(dir);
 		return run(
-			`${commandPrefix} eslint --ext ${extensionsArg} ${fixArg} --no-color --format json ${args} "."`,
+			`${commandPrefix} eslint --ext ${extensionsArg} ${fixArg} --no-color --format json ${args} "$DIFF"`,
 			{
 				dir,
 				ignoreErrors: true,
