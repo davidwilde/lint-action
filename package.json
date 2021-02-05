@@ -1,13 +1,13 @@
 {
 	"name": "lint-action",
-	"version": "1.7.0",
+	"version": "1.8.0",
 	"description": "GitHub Action for detecting and fixing linting errors",
 	"author": {
 		"name": "Samuel Meuli",
 		"email": "me@samuelmeuli.com",
 		"url": "https://samuelmeuli.com"
 	},
-	"repository": "github:wearerequired/lint-action",
+	"repository": "github:davidwilde/lint-action",
 	"license": "MIT",
 	"private": true,
 	"main": "./dist/index.js",
