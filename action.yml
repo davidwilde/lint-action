@@ -30,6 +30,10 @@ inputs:
     description: 'Template for the name of the check run. The "${linter}" and "${dir}" variables can be used to insert the name and directory of the linter.'
     required: false
     default: "${linter}"
+  only_changes:
+    description: "Only lint the changes made in the pull request"
+    required: false
+    default: "false"
 
   # CSS
 
